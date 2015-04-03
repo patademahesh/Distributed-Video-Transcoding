@@ -1,9 +1,9 @@
-# Scalable-Parallel-Video-Transcoding
+# Simple Scalable, Parallel, Multi-bitrate Video Transcoding
 Simple Scalable, Parallel, Multi-bitrate Video Transcoding On Centos / Ubuntu / Suse / RedHat (Bash Scripts)
 
-Multi-bitrate Video processing requires lots of computing power and time to process full movie. There are different open source video transcoding and processing tools freely available in Linux, like libav-tools, ffmpeg, mencoder, and handbrake. However, none of these tools support PARALLEL computing easily.
+Multi-bitrate Video processing requires lots of computing power and time to process full movie. There are different open source video transcoding and processing tools freely available in Linux, like libav-tools, ffmpeg, mencoder, and handbrake. However, none of these tools support **PARALLEL** computing easily.
 
-After some research, I found amazing solution designed & developed by 'Dustin Kirkland' based on Ubuntu JUJU and avconv (http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html). But our requirement was little bit diffrent from Dustins's solution. Our requirement was to convert single video in Multi-bitrate and in formats like 3gp, flv. Also we want to build this solution on top of CentOS and ffmpeg. So I decided to design and develop "Simple Scalable, Parallel, Multi-bitrate Video Transcoding System" by myself. Here is my solution.
+After some research, I found amazing [solution](http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html) designed & developed by '[Dustin Kirkland](http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html)' based on Ubuntu JUJU and [avconv](https://libav.org/avconv.html). But our requirement was little bit diffrent from Dustins's solution. Our requirement was to convert single video in Multi-bitrate and in formats like 3gp, flv. Also we want to build this solution on top of CentOS and ffmpeg. So I decided to design and develop "Simple Scalable, Parallel, Multi-bitrate Video Transcoding System" by myself. Here is my solution.
 
 The Algorithm is same as Dustin's solution but with some changes:
 
