@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Simple Scalable, Parallel, Multi-bitrate Video Transcoding by patademahesh</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Simple Scalable, Parallel, Multi-bitrate Video Transcoding</h1>
+        <p>Simple Scalable, Parallel, Multi-bitrate Video Transcoding ( Centos / Ubuntu / Suse / RedHat )</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/patademahesh/Scalable-Parallel-Multi-bitrate-Video-Transcoding" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/patademahesh/Scalable-Parallel-Multi-bitrate-Video-Transcoding/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/patademahesh/Scalable-Parallel-Multi-bitrate-Video-Transcoding/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>
+<a id="simple-scalable-parallel-multi-bitrate-video-transcoding" class="anchor" href="#simple-scalable-parallel-multi-bitrate-video-transcoding" aria-hidden="true"><span class="octicon octicon-link"></span></a>Simple Scalable, Parallel, Multi-bitrate Video Transcoding</h1>
+
+<p>Simple Scalable, Parallel, Multi-bitrate Video Transcoding On Centos / Ubuntu / Suse / RedHat (Bash Scripts)</p>
+
+<p>Multi-bitrate Video processing requires lots of computing power and time to process full movie. There are different open source video transcoding and processing tools freely available in Linux, like libav-tools, ffmpeg, mencoder, and handbrake. However, none of these tools support <strong>PARALLEL</strong> computing easily.</p>
+
+<p>After some research, I found amazing <a href="http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html">solution</a> designed &amp; developed by '<a href="http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html">Dustin Kirkland</a>' based on Ubuntu JUJU and <a href="https://libav.org/avconv.html">avconv</a>. But our requirement was little bit diffrent from Dustins's solution. Our requirement was to convert single video in Multi-bitrate and in formats like 3gp, flv. Also we want to build this solution on top of CentOS and ffmpeg. So I decided to design and develop "Simple Scalable, Parallel, Multi-bitrate Video Transcoding System" by myself. Here is my solution.</p>
+
+<p>The Algorithm is same as Dustin's solution but with some changes:</p>
+
+<ol>
+<li>Upload file to FTP. After a successful upload CallUploadScript(pure-ftpd function) will call script:
+
+<ul>
+<li>Script is responsible for syncing files to all nodes(Disabled ssh encryptions to speed up transfer)</li>
+<li>Updating duration, file path, filename of video and number of nodes available currently for transcoding to MYSQL</li>
+</ul>
+</li>
+<li>Transcode Nodes will split the work into even sized chunks for each node</li>
+<li>Each Node will then process their segments of video and raise a flag when done</li>
+<li>Master node will wait for each of the all-done flags, and then any master will pick the job to concatenate the result</li>
+<li>Upload converted files to different CDN</li>
+</ol>
+
+<p>Pre-requisites:</p>
+
+<ol>
+<li>bc</li>
+<li>nproc</li>
+<li>ffmpeg</li>
+<li>mysql</li>
+<li>mysql-server(For master node)</li>
+<li>mplayer</li>
+<li>rsync</li>
+<li>Password less ssh login</li>
+<li>nfs server and client</li>
+<li>screen</li>
+<li>ffprobe</li>
+</ol>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/patademahesh">patademahesh</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
