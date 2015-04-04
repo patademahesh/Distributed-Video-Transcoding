@@ -99,7 +99,7 @@ while true; do
 						ERRORLOG=						
 						rm -fv /tmp/master
 					else
-						# Concatenate the clips together
+						# Concatenate the clips together (All bitrate)
 						for b in ${BITRATE}; do
 							CONCAT=;CONCAT="/dev/null"
 							for i in $(seq 0 ${TOTAL_NODES}); do
@@ -143,8 +143,11 @@ while true; do
 							fi
 							
 							# Thumbnail generation
-							VIDEOLEN=$(mplayer -identify "${OUTPATH}${FILEWOEXT}.${FORMAT}" 2>/dev/null | grep ID_LENGTH | cut -d= -f2 | cut -d. -f1)
-							#VIDEOLEN=$(expr ${VIDEOLEN} - 10)
+							# get duration of file in seconds
+							TMPVIDEOLEN=$(ffprobe  "${OUTPATH}${FILEWOEXT}.${FORMAT}" 2>&1 | /bin/grep Duration: | /bin/sed -e "s/^.*Duration: //" -e "s/\..*$//")
+							VIDEOLEN=$(/bin/date -u -d "1970-01-01 ${TMPVIDEOLEN}" +"%s")
+							
+							# Adjust Video length in multiples of 10
 							MODVIDEOLEN=$((${VIDEOLEN} % 10))
 							if [ ${MODVIDEOLEN} -ne 0 ]; then
 								VIDEOLEN=$(((10 - ${VIDEOLEN} % 10) + ${VIDEOLEN}))
