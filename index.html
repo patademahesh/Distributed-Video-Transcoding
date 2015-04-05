@@ -64,7 +64,8 @@
 <li>Upload converted files to different CDN</li>
 </ol>
 
-<p>Pre-requisites:</p>
+<h1>
+<a id="pre-requisites" class="anchor" href="#pre-requisites" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pre-requisites:</h1>
 
 <ol>
 <li>bc</li>
@@ -78,6 +79,48 @@
 <li>nfs server and client</li>
 <li>screen</li>
 <li>ffprobe</li>
+</ol>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation:</h1>
+
+<ol>
+<li>Install ffmpeg(Click <a href="http://wiki.razuna.com/display/ecp/FFMpeg+Installation+on+CentOS+and+RedHat">here</a> for instruction)</li>
+<li>Download and copy all scripts to /srv directory</li>
+<li>Change file permission to 755</li>
+<li>Install Pure-FTPD and change CallUploadscript directive to yes in /etc/pure-ftpd.conf file</li>
+<li>
+<p>Create test user for FTP and set password</p>
+
+<p><code># useradd -m ftptest; passwd ftptest</code></p>
+</li>
+<li>
+<p>Run below commands to change pure-ftpd init script</p>
+
+<p><code># sed -i 's#start() {#start() {\n\t/usr/sbin/pure-uploadscript -B -r /srv/CallUpload.sh#g' /etc/init.d/pure-ftpd</code></p>
+
+<p><code># sed -i 's#stop() {#stop() {\n\tkillall -9 pure-uploadscript#g' /etc/init.d/pure-ftpd</code></p>
+</li>
+<li><p>restart pure-ftp service</p></li>
+<li>Change Master/DB IP in all three scripts (MASTER_NODE variable)</li>
+<li>Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)</li>
+<li>Install mysql-server and create transcode database. Create transcode user with password same as username. Make sure user is able to connect from all of the worker nodes.</li>
+<li>
+</li>
+<li>
+<p>start screen named master and run below command</p>
+
+<p><code># screen -S master</code></p>
+
+<p><code># bash -x /srv/transcode-master.sh &gt; /home/master.log  2&gt;&amp;1</code></p>
+</li>
+<li>
+<p>start screen named nodes and run below command</p>
+
+<p><code># screen -S nodes</code></p>
+
+<p><code># bash -x /srv/transcode-nodes.sh &gt; /home/nodes.log  2&gt;&amp;1</code></p>
+</li>
 </ol>
       </section>
       <footer>
