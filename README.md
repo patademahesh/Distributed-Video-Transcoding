@@ -15,7 +15,7 @@ The Algorithm is same as Dustin's solution but with some changes:
   4. Master node will wait for each of the all-done flags, and then any master will pick the job to concatenate the result
   5. Upload converted files to different CDN
 
-Pre-requisites:
+# Pre-requisites:
   1. bc
   2. nproc
   3. ffmpeg
@@ -27,3 +27,36 @@ Pre-requisites:
   9. nfs server and client
   10. screen
   11. ffprobe
+
+# Installation:
+
+1. Install ffmpeg(Click [here](http://wiki.razuna.com/display/ecp/FFMpeg+Installation+on+CentOS+and+RedHat) for instruction)
+2. Download and copy all scripts to /srv directory
+3. Change file permission to 755
+4. Install Pure-FTPD and change CallUploadscript directive to yes in /etc/pure-ftpd.conf file
+5. Create test user for FTP and set password
+
+   `# useradd -m ftptest; passwd ftptest`
+   
+6. Run below commands to change pure-ftpd init script
+
+   `# sed -i 's#start() {#start() {\n\t/usr/sbin/pure-uploadscript -B -r /srv/CallUpload.sh#g' /etc/init.d/pure-ftpd`
+
+   `# sed -i 's#stop() {#stop() {\n\tkillall -9 pure-uploadscript#g' /etc/init.d/pure-ftpd`
+
+7. restart pure-ftp service
+8. Change Master/DB IP in all three scripts (MASTER_NODE variable)
+9. Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)
+10. Install mysql-server and create transcode database. Create transcode user with password same as username. Make sure user is able to connect from all of the worker nodes.
+11. 
+10. start screen named master and run below command
+
+   `# screen -S master`
+
+   `# bash -x /srv/transcode-master.sh > /home/master.log  2>&1`
+
+11. start screen named nodes and run below command
+
+   `# screen -S nodes`
+
+   `# bash -x /srv/transcode-nodes.sh > /home/nodes.log  2>&1`
