@@ -47,15 +47,16 @@ The Algorithm is same as Dustin's solution but with some changes:
 7. restart pure-ftp service
 8. Change Master/DB IP in all three scripts (MASTER_NODE variable)
 9. Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)
-10. Install mysql-server and create transcode database. Create transcode user with password same as username. Make sure user is able to connect from all of the worker nodes.
-11. 
-10. start screen named master and run below command
+10. Install mysql-server and create 'transcode' database. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
+11. NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"
+
+12. start screen named master and run below command
 
    `# screen -S master`
 
    `# bash -x /srv/transcode-master.sh > /home/master.log  2>&1`
 
-11. start screen named nodes and run below command
+13. start screen named nodes and run below command
 
    `# screen -S nodes`
 
