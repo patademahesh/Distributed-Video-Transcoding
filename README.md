@@ -3,7 +3,7 @@ Simple Scalable, Parallel, Multi-bitrate Video Transcoding On Centos / Ubuntu / 
 
 Multi-bitrate Video processing requires lots of computing power and time to process full movie. There are different open source video transcoding and processing tools freely available in Linux, like libav-tools, ffmpeg, mencoder, and handbrake. However, none of these tools support **PARALLEL** computing easily.
 
-After some research, I found amazing [solution](http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html) designed & developed by '[Dustin Kirkland](http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html)' based on Ubuntu JUJU and [avconv](https://libav.org/avconv.html). But our requirement was little bit diffrent. The requirement was to convert single video in Multi-bitrate and in diffrent formats like 3gp, flv. And goal was to build generic system/solution on top of CentOS and ffmpeg. So I decided to develop Transcoding System by myself. Here is my solution.
+After some research, I found amazing [solution](http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html) designed & developed by '[Dustin Kirkland](http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html)' based on Ubuntu JUJU and [avconv](https://libav.org/avconv.html). But our requirement was little bit diffrent from Dustins's solution. Our requirement was to convert single video in Multi-bitrate and in formats like 3gp, flv. Also we want to build this solution on top of CentOS and ffmpeg. So I decided to design and develop "Simple Scalable, Parallel, Multi-bitrate Video Transcoding System" by myself. Here is my solution.
 
 The Algorithm is same as Dustin's solution but with some changes:
 
@@ -47,16 +47,16 @@ The Algorithm is same as Dustin's solution but with some changes:
 7. restart pure-ftp service
 8. Change Master/DB IP in all three scripts (MASTER_NODE variable)
 9. Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)
-10. Install mysql-server and create 'transcode' database. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
+10. Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
 11. NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"
 
-12. start screen named master and run below command
+10. start screen named master and run below command
 
    `# screen -S master`
 
    `# bash -x /srv/transcode-master.sh > /home/master.log  2>&1`
 
-13. start screen named nodes and run below command
+11. start screen named nodes and run below command
 
    `# screen -S nodes`
 
