@@ -61,3 +61,7 @@ The Algorithm is same as Dustin's solution but with some changes:
    `# screen -S nodes`
 
    `# bash -x /srv/transcode-nodes.sh > /home/nodes.log  2>&1`
+
+12. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
+
+    `# cp -a frontend/ /var/www/html/ `
