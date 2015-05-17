@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Simple Scalable, Parallel, Multi-bitrate Video Transcoding by patademahesh</title>
+    <title>Distributed Video Transcoding by patademahesh</title>
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="javascripts/main.js"></script>
     <!--[if lt IE 9]>
@@ -17,19 +17,19 @@
   <body>
 
       <header>
-        <h1>Simple Scalable, Parallel, Multi-bitrate Video Transcoding</h1>
+        <h1>Distributed Video Transcoding</h1>
         <p>Simple Scalable, Parallel, Multi-bitrate Video Transcoding ( Centos / Ubuntu / Suse / RedHat )</p>
       </header>
 
       <div id="banner">
         <span id="logo"></span>
 
-        <a href="https://github.com/patademahesh/Scalable-Parallel-Multi-bitrate-Video-Transcoding" class="button fork"><strong>View On GitHub</strong></a>
+        <a href="https://github.com/patademahesh/Distributed-Video-Transcoding" class="button fork"><strong>View On GitHub</strong></a>
         <div class="downloads">
           <span>Downloads:</span>
           <ul>
-            <li><a href="https://github.com/patademahesh/Scalable-Parallel-Multi-bitrate-Video-Transcoding/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/patademahesh/Scalable-Parallel-Multi-bitrate-Video-Transcoding/tarball/master" class="button">TAR</a></li>
+            <li><a href="https://github.com/patademahesh/Distributed-Video-Transcoding/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/patademahesh/Distributed-Video-Transcoding/tarball/master" class="button">TAR</a></li>
           </ul>
         </div>
       </div><!-- end banner -->
@@ -119,6 +119,11 @@
 <p><code># screen -S nodes</code></p>
 
 <p><code># bash -x /srv/transcode-nodes.sh &gt; /home/nodes.log  2&gt;&amp;1</code></p>
+</li>
+<li>
+<p>Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/</p>
+
+<p><code># cp -a frontend/ /var/www/html/</code></p>
 </li>
 </ol>
       </section>
