@@ -166,7 +166,7 @@ while true; do
 					rm -fv /tmp/nodes
 					sleep 5
 				else
-					rm -fv "${FILENAME}"
+					# rm -fv "${FILENAME}"
 					# Update job status, so that the other workers know when its done
 					${MYSQL} "UPDATE jobs SET job_status=job_status+1  WHERE job_id = ${JOB_ID};"
 					rm -fv /tmp/nodes
