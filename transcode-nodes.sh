@@ -14,9 +14,9 @@ trap finish EXIT
 CPUNO=$(/usr/bin/nproc)
 FORMAT="mp4"
 BITRATE="128 256 512 712" # Used in Rsync command, if changed change in rsync also
-MASTER_NODE="192.168.92.73"
-MYSQL="mysql --skip-column-names -utranscode -ptranscode -h ${MASTER_NODE} transcoding -e"
-IPADDR=$(ifconfig eth0 | grep -v 'inet6'| grep 'addr:'| sed "s/Bcast.*//g"| cut -d ":" -f2|sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+DB_IP="TO BE CHANGED"
+MYSQL="mysql --skip-column-names -utranscode -ptranscode -h ${DB_IP} transcoding -e"
+IPADDR=$(hostname -i)
 
 while true; do
 	mkdir -p /srv/workers
