@@ -14,9 +14,9 @@ trap finish EXIT
 CPUNO=$(/usr/bin/nproc)
 FORMAT="mp4"
 BITRATE="128000 256000 512000 712000" # Used in Rsync command, if changed change in rsync also
-MASTER_NODE="192.168.92.73"
-MYSQL="mysql --skip-column-names -utranscode -ptranscode -h ${MASTER_NODE} transcoding -e"
-IPADDR=$(ifconfig eth0 | grep -v 'inet6'| grep 'addr:'| sed "s/Bcast.*//g"| cut -d ":" -f2|sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+DB_IP="TO BE CHANGED"
+MYSQL="mysql --skip-column-names -utranscode -ptranscode -h ${DB_IP} transcoding -e"
+IPADDR=$(hostname -i)
 
 while true; do
 	mkdir -p /srv/masters
@@ -32,7 +32,7 @@ while true; do
 		
 		if [ ! -z ${JOB_ID} ]; then
 			
-			IPADDR=$(ifconfig eth0 | grep -v 'inet6'| grep 'addr:'| sed "s/Bcast.*//g"| cut -d ":" -f2|sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+			IPADDR=$(hostname -i)
 			${MYSQL} "UPDATE jobs SET curmaster = concat(ifnull(curmaster,''), '${IPADDR},') where job_id = ${JOB_ID};"
 			
 			GETCURMASTER=$(${MYSQL} "SELECT curmaster FROM jobs WHERE job_id = '${JOB_ID}'"| cut -d"," -f1)
