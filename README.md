@@ -45,7 +45,7 @@ The Algorithm is same as Dustin's solution but with some changes:
    `# sed -i 's#stop() {#stop() {\n\tkillall -9 pure-uploadscript#g' /etc/init.d/pure-ftpd`
 
 7. restart pure-ftp service
-8. Change Master/DB IP in all three scripts (MASTER_NODE variable)
+8. Change Database IP in all three scripts (DB_IP variable)
 9. Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)
 10. Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
 11. NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"
