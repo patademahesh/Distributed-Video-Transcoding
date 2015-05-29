@@ -45,23 +45,22 @@ The Algorithm is same as Dustin's solution but with some changes:
    `# sed -i 's#stop() {#stop() {\n\tkillall -9 pure-uploadscript#g' /etc/init.d/pure-ftpd`
 
 7. restart pure-ftp service
-8. Change Database IP in all three scripts (DB_IP variable)
-9. Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)
-10. Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
-11. NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"
+8. Make sure to Change Database IP in all three scripts (DB_IP variable)
+9. Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
+10. NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"
 
-10. On all servers start screen named master and run below command
+11. On all servers start screen named master and run below command
 
    `# screen -S master`
 
    `# bash -x /srv/transcode-master.sh > /home/master.log  2>&1`
 
-11. On all servers start screen named nodes and run below command
+12. On all servers start screen named nodes and run below command
 
    `# screen -S nodes`
 
    `# bash -x /srv/transcode-nodes.sh > /home/nodes.log  2>&1`
 
-12. To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
+13. To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
 
     `# cp -a frontend/ /var/www/html/ `
