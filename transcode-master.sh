@@ -11,7 +11,7 @@ function finish {
 }
 trap finish EXIT
 
-CPUNO=$(/usr/bin/nproc)
+CPUNO=$(cat /proc/cpuinfo |grep processor|wc -l)
 FORMAT="mp4"
 BITRATE="128000 256000 512000 712000" # Used in Rsync command, if changed change in rsync also
 DB_IP="TO BE CHANGED"
@@ -22,7 +22,6 @@ while true; do
 	mkdir -p /srv/masters
 	date > /srv/masters/$(hostname)
 	CURRENT_NODE=$(ls /srv/masters/ | grep -B99999 $(hostname) | wc -l)
-	#CURRENT_NODE=$((CURRENT_NODE-1))
 	
 	if [ ! -s /tmp/nodes ]; then
 		echo "Master" > /tmp/master
@@ -31,7 +30,6 @@ while true; do
 		JOB_ID=$(${MYSQL} "SELECT job_id FROM jobs WHERE job_status=no_nodes AND node_failed IS NULL AND job_failed IS NULL AND curmaster IS NULL AND conversion_end_time IS NULL LIMIT 1;")
 		
 		if [ ! -z ${JOB_ID} ]; then
-			
 			IPADDR=$(hostname -i)
 			${MYSQL} "UPDATE jobs SET curmaster = concat(ifnull(curmaster,''), '${IPADDR},') where job_id = ${JOB_ID};"
 			
@@ -54,10 +52,7 @@ while true; do
 				
 				# Check for Content Provider Details
 				CONTPROVIDER=$(echo "${FILEPATH}"| cut -d"/" -f4)
-				CPHOST=$(${MYSQL} "SELECT host FROM cpdetails WHERE cp = '${CONTPROVIDER}';")
-				CPUSER=$(${MYSQL} "SELECT user FROM cpdetails WHERE cp = '${CONTPROVIDER}';")
-				CPPASS=$(${MYSQL} "SELECT password FROM cpdetails WHERE cp = '${CONTPROVIDER}';")
-				export RSYNC_PASSWORD=${CPPASS}
+				
 				
 				# Set output directory and create it
 				OUTPATH="/video-process/processed/${CONTPROVIDER}/${CURDATE}/${FILEWOEXT}/"
@@ -68,8 +63,6 @@ while true; do
 				TOTAL_NODES_TMP=$(${MYSQL} "SELECT no_nodes FROM jobs WHERE job_id = ${JOB_ID};")
 				TOTAL_NODES=$((TOTAL_NODES_TMP-1))
 				
-				# Kill off any previous running jobs
-				# killall -9 ffmpeg 2>/dev/null || true
 				ERROR=0;
 				
 				for i in $(ls /srv/workers/ | grep -v $(hostname)); do
@@ -91,7 +84,7 @@ while true; do
 					ERRORLOG=
 					rm -fv /tmp/master
 					sleep 5;
-				else					
+				else
 					# Check for error
 					if [ $ERROR -ne '0' ]; then
 						${MYSQL} "UPDATE jobs SET node_failed = '${ERRORLOG}' where job_id = ${JOB_ID};"
@@ -99,7 +92,6 @@ while true; do
 						ERRORLOG=						
 						rm -fv /tmp/master
 					else
-						# Concatenate the clips together (All bitrate)
 						for b in ${BITRATE}; do
 							CONCAT=;CONCAT="/dev/null"
 							for i in $(seq 0 ${TOTAL_NODES}); do
@@ -143,11 +135,9 @@ while true; do
 							fi
 							
 							# Thumbnail generation
-							# get duration of file in seconds
 							TMPVIDEOLEN=$(ffprobe  "${OUTPATH}${FILEWOEXT}.${FORMAT}" 2>&1 | /bin/grep Duration: | /bin/sed -e "s/^.*Duration: //" -e "s/\..*$//")
 							VIDEOLEN=$(/bin/date -u -d "1970-01-01 ${TMPVIDEOLEN}" +"%s")
-							
-							# Adjust Video length in multiples of 10
+							#VIDEOLEN=$(expr ${VIDEOLEN} - 10)
 							MODVIDEOLEN=$((${VIDEOLEN} % 10))
 							if [ ${MODVIDEOLEN} -ne 0 ]; then
 								VIDEOLEN=$(((10 - ${VIDEOLEN} % 10) + ${VIDEOLEN}))
@@ -180,49 +170,55 @@ while true; do
 								${MYSQL} "UPDATE jobs SET conversion_end_time = current_timestamp where job_id = ${JOB_ID};"
 								rm -fv /tmp/master
 								
-								echo '######### Syncing folder structure to akamai #########' >> "${OUTPATH}${FILEWOEXT}-sync.log.txt" 2>&1
-								# Sync local folder structure to remote location
-								if ! rsync --timeout=30  -f"+ */" -f"- *" -avz "${FTPPATH}"/ "${CPUSER}@${CPHOST}::${CPUSER}/" >> "${OUTPATH}${FILEWOEXT}-sync.log.txt" 2>&1 ; then
+								# Cleaning all .ts and logs
+								rm -f "${OUTPATH}"/*.ts >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1 || echo "removal of .ts failed"
+								mv -f "${OUTPATH}"/*.txt "${OUTPATH}/LOGS/" || echo "Move log files to LOGS deirectory"
+								
+								# Start upload to akamai storage
+								SYNCERROR=0;
+								while read line; do
+									CPHOST=$(echo "$line"|awk '{print $4}');
+									CPUSER=$(echo "$line"|awk '{print $2}');
+									CPPASS=$(echo "$line"|awk '{print $3}');
+									export RSYNC_PASSWORD=${CPPASS};
+									
+									echo '######### Syncing folder structure to CDN #########' >> "${OUTPATH}/LOGS/${FILEWOEXT}-sync.log.txt" 2>&1
+									# Sync local folder structure to remote location
+									if ! rsync --timeout=30  -f"+ */" -f"- *" -avz "${FTPPATH}"/ "${CPUSER}@${CPHOST}::${CPUSER}/" >> "${OUTPATH}/LOGS/${FILEWOEXT}-sync.log.txt" 2>&1; then
+										SYNCERROR=1;
+									fi
+									echo '######### Syncing files to CDN #########' >> "${OUTPATH}/LOGS/${FILEWOEXT}-sync.log.txt" 2>&1
+									if ! rsync --timeout=30 --progress --exclude=LOGS -avz "${OUTPATH}"/ "${CPUSER}@${CPHOST}::${CPUSER}/${REMOTEPATH}/" >> "${OUTPATH}/LOGS/${FILEWOEXT}-sync.log.txt" 2>&1; then
+										SYNCERROR=1;
+									fi
+								done < <(${MYSQL} "SELECT * FROM cpdetails WHERE cp = '${CONTPROVIDER}';")
+								
+								if [ $SYNCERROR -ne '0' ]; then
 									ERRORLOG="${ERRORLOG} Rsync Failed "
 									${MYSQL} "UPDATE jobs SET job_failed = '${ERRORLOG}' where job_id = ${JOB_ID};"
 									echo "Error: Job Failed: ${JOB_ID} Log: ${ERRORLOG}" >> /var/log/master.log
 									ERRORLOG=
 									rm -fv /tmp/master
 								else
-									# Cleaning all .ts and logs
-									rm -f "${OUTPATH}"/*.ts >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1 || echo "removal of .ts failed"
-									mv -f "${OUTPATH}"/*.txt "${OUTPATH}/LOGS/" || echo "Move log files to LOGS deirectory"
+									rm -fv "${OUTPATH}"/*.mp4 >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .mp4 Failed"
+									rm -fv "${OUTPATH}"/*.3gp >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .3gp Failed"
+									rm -fv "${OUTPATH}"/*.flv >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .flv Failed"
+									rm -fv "${OUTPATH}"/*.jpg >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .jpg Failed"
+									rm -fv "${FILEPATH}/${FILEWEXT}" >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove Source File Failed"
 									
-									echo '######### Syncing files to akamai #########' >> "${OUTPATH}/LOGS/${FILEWOEXT}-sync.log.txt" 2>&1
-									# Start upload to akamai storage
-									if ! rsync --timeout=30 --progress --exclude=LOGS -avz "${OUTPATH}"/ "${CPUSER}@${CPHOST}::${CPUSER}/${REMOTEPATH}/" >> "${OUTPATH}/LOGS/${FILEWOEXT}-sync.log.txt" 2>&1; then
-										ERRORLOG="${ERRORLOG} Rsync Failed "
-										${MYSQL} "UPDATE jobs SET job_failed = '${ERRORLOG}' where job_id = ${JOB_ID};"
-										echo "Error: Job Failed: ${JOB_ID} Log: ${ERRORLOG}" >> /var/log/master.log
-										ERRORLOG=
-										rm -fv /tmp/master
-									else
-										rm -fv "${OUTPATH}"/*.mp4 >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .mp4 Failed"
-										rm -fv "${OUTPATH}"/*.3gp >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .3gp Failed"
-										rm -fv "${OUTPATH}"/*.flv >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .flv Failed"
-										rm -fv "${OUTPATH}"/*.jpg >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .jpg Failed"
-										rm -fv "${FILEPATH}/${FILEWEXT}" >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove Source File Failed"
-										
-										# Removing source file from all nodes
-										for i in $(ls /srv/workers/); do
-											echo "######### Removing source file from ${i} #########" >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1
-											ssh ${i} "rm -fv ${FILEPATH}/${FILEWEXT}" >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Source file remove from worker failed"
-										done
-										
-										# Clear previously failed job if exists
-										${MYSQL} "DELETE FROM jobs WHERE name LIKE '${FILEWEXT}' AND (node_failed IS NOT NULL OR job_failed IS NOT NULL);"
-										# Update job status, so that the other workers know when its done
-										${MYSQL} "UPDATE jobs SET job_status=job_status+1  WHERE job_id = ${JOB_ID};"
-										# Update end time
-										${MYSQL} "UPDATE jobs SET end_time = current_timestamp where job_id = ${JOB_ID};"
-										${MYSQL} "DELETE FROM jobs WHERE name LIKE '${FILEWEXT}' AND (conversion_end_time IS NULL OR end_time IS NULL);"
-										rm -fv /tmp/master
-									fi
+									for i in $(ls /srv/workers/); do
+										echo "######### Removing source file from ${i} #########" >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1
+										ssh ${i} "rm -fv ${FILEPATH}/${FILEWEXT}" >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Source file remove from worker failed"
+									done
+									
+									# Clear previously failed job if exists
+									${MYSQL} "DELETE FROM jobs WHERE name LIKE '${FILEWEXT}' AND (node_failed IS NOT NULL OR job_failed IS NOT NULL);"
+									# Update job status, so that the other workers know when its done
+									${MYSQL} "UPDATE jobs SET job_status=job_status+1  WHERE job_id = ${JOB_ID};"
+									# Update end time
+									${MYSQL} "UPDATE jobs SET end_time = current_timestamp where job_id = ${JOB_ID};"
+									${MYSQL} "DELETE FROM jobs WHERE name LIKE '${FILEWEXT}' AND (conversion_end_time IS NULL OR end_time IS NULL);"
+									rm -fv /tmp/master
 								fi
 							fi
 						fi
