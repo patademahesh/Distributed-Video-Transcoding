@@ -18,7 +18,7 @@
 
       <header>
         <h1>Distributed Video Transcoding</h1>
-        <p>Simple, Scalable, Distributed, Parallel, Multi-bitrate Video Transcoding ( Centos / Ubuntu / Suse / RedHat )</p>
+        <p>Distributed, Scalable, Parallel, Multi-bitrate Video Transcoding ( Centos / Ubuntu / Suse / RedHat )</p>
       </header>
 
       <div id="banner">
@@ -102,26 +102,25 @@
 <p><code># sed -i 's#stop() {#stop() {\n\tkillall -9 pure-uploadscript#g' /etc/init.d/pure-ftpd</code></p>
 </li>
 <li><p>restart pure-ftp service</p></li>
-<li>Change Master/DB IP in all three scripts (MASTER_NODE variable)</li>
-<li>Make sure to change WORKERS variable in CallUpload.sh script(all servers hostname)</li>
+<li>Make sure to Change Database IP in all three scripts (DB_IP variable)</li>
 <li>Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.</li>
 <li><p>NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"</p></li>
 <li>
-<p>start screen named master and run below command</p>
+<p>On all servers start screen named master and run below command</p>
 
 <p><code># screen -S master</code></p>
 
 <p><code># bash -x /srv/transcode-master.sh &gt; /home/master.log  2&gt;&amp;1</code></p>
 </li>
 <li>
-<p>start screen named nodes and run below command</p>
+<p>On all servers start screen named nodes and run below command</p>
 
 <p><code># screen -S nodes</code></p>
 
 <p><code># bash -x /srv/transcode-nodes.sh &gt; /home/nodes.log  2&gt;&amp;1</code></p>
 </li>
 <li>
-<p>Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/</p>
+<p>To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/</p>
 
 <p><code># cp -a frontend/ /var/www/html/</code></p>
 </li>
