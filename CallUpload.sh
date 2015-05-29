@@ -2,10 +2,9 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
 echo "${1}" > /tmp/filename
 
-MASTER_NODE="192.168.92.73"
-WORKERS="blade01.vodserver.com blade02.vodserver.com blade03.vodserver.com blade04.vodserver.com blade05.vodserver.com"
+DB_IP="TO BE CHANGED"
 
-MYSQL="/usr/bin/mysql --skip-column-names -utranscode -ptranscode -h ${MASTER_NODE} transcoding -e"
+MYSQL="/usr/bin/mysql --skip-column-names -utranscode -ptranscode -h ${DB_IP} transcoding -e"
 
 NUMBER_NODE=$(ls /srv/workers/ | wc -l)
 FILE=${1}
@@ -13,8 +12,8 @@ FILENAME=$(basename ${FILE})
 FILEPATH=${FILE%/*}
 CONTPROVIDER=$(echo "${FILE}"| cut -d"/" -f4);
 
-#Sync Source file to all nodes/workers
-for i in ${WORKERS}; do
+#Sync Source file to all live nodes/workers
+for i in $(ls /srv/workers/); do
 	rsync --timeout=30  -f"+ */" -f"- *" -rRvz "${FILEPATH}" ${i}:/
 	rsync --rsh="ssh -c arcfour256,arcfour128,blowfish-cbc,aes128-ctr,aes192-ctr,aes256-ctr" -Rv ${FILE} ${i}:/ ;
 done
