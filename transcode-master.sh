@@ -208,6 +208,12 @@ while true; do
 										rm -fv "${OUTPATH}"/*.jpg >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove .jpg Failed"
 										rm -fv "${FILEPATH}/${FILEWEXT}" >> "${OUTPATH}/LOGS/${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Remove Source File Failed"
 										
+										# Removing source file from all nodes
+										for i in $(ls /srv/workers/); do
+											echo "######### Removing source file from ${i} #########" >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1
+											ssh ${i} "rm -fv ${FILEPATH}/${FILEWEXT}" >> "${OUTPATH}${FILEWOEXT}-delete.log.txt" 2>&1 || echo "Source file remove from worker failed"
+										done
+										
 										# Clear previously failed job if exists
 										${MYSQL} "DELETE FROM jobs WHERE name LIKE '${FILEWEXT}' AND (node_failed IS NOT NULL OR job_failed IS NOT NULL);"
 										# Update job status, so that the other workers know when its done
