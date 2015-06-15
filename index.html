@@ -46,7 +46,7 @@
 
 <p>Multi-bitrate Video processing requires lots of computing power and time to process full movie. There are different open source video transcoding and processing tools freely available in Linux, like libav-tools, ffmpeg, mencoder, and handbrake. However, none of these tools support <strong>PARALLEL</strong> computing easily.</p>
 
-<p>After some research, I found amazing <a href="http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html">solution</a> designed &amp; developed by '<a href="http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html">Dustin Kirkland</a>' based on Ubuntu JUJU and <a href="https://libav.org/avconv.html">avconv</a>. But our requirement was little bit diffrent from Dustins's solution. Our requirement was to convert single video in Multi-bitrate and in formats like 3gp, flv and upload them to single or multiple CDN(like Akamai or tata). Also we want to build this solution on top of CentOS and ffmpeg. So I decided to design and develop "Simple Scalable, Parallel, Multi-bitrate Video Transcoding System" by myself. Here is my solution.</p>
+<p>After some research, I found amazing <a href="http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html">solution</a> designed by '<a href="http://blog.dustinkirkland.com/2014/07/scalable-parallel-video-transcoding-on.html">Dustin Kirkland</a>' based on Ubuntu JUJU and <a href="https://libav.org/avconv.html">avconv</a>. But our requirement was little bit diffrent from Dustins's solution. Our requirement was to convert single video in Multi-bitrate and in formats like 3gp, flv and upload them to single or multiple CDN(like Akamai or tata). Also we want to build this solution on top of CentOS and ffmpeg. So I decided to  develop "Simple Scalable, Parallel, Multi-bitrate Video Transcoding System" by myself. Here is my solution.</p>
 
 <p>The Algorithm is same as Dustin's solution but with some changes:</p>
 
@@ -60,7 +60,7 @@
 </li>
 <li>Transcode Nodes will split the work into even sized chunks for each node</li>
 <li>Each Node will then process their segments of video and raise a flag when done</li>
-<li>Master node will wait for each of the all-done flags, and then any master will pick the job to concatenate the result</li>
+<li>Master nodes will wait for each of the all-done flags, and then any master will pick the job to concatenate the result</li>
 <li>Upload converted files to different CDN</li>
 </ol>
 
@@ -86,7 +86,7 @@
 
 <ol>
 <li>Install ffmpeg(Click <a href="http://wiki.razuna.com/display/ecp/FFMpeg+Installation+on+CentOS+and+RedHat">here</a> for instruction)</li>
-<li>Download and copy all scripts to /srv directory</li>
+<li>Download and copy all scripts(.sh files) to /srv directory</li>
 <li>Change file permission to 755</li>
 <li>Install Pure-FTPD and change CallUploadscript directive to yes in /etc/pure-ftpd.conf file</li>
 <li>
