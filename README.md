@@ -25,7 +25,7 @@ The Algorithm is same as Dustin's solution but with some changes:
   7. rsync
   8. Password less ssh login
   9. nfs server and client
-  10. screen
+  10. supervisord
   11. ffprobe
 
 # Installation:
@@ -49,18 +49,8 @@ The Algorithm is same as Dustin's solution but with some changes:
 9. Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.
 10. NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"
 
-11. On all servers start screen named master and run below command
+11. On all servers install supervisord and copy supervisord.conf from download directory to /etc/supervisord.conf. Restart supervisord service.
 
-   `# screen -S master`
-
-   `# bash -x /srv/transcode-master.sh > /home/master.log  2>&1`
-
-12. On all servers start screen named nodes and run below command
-
-   `# screen -S nodes`
-
-   `# bash -x /srv/transcode-nodes.sh > /home/nodes.log  2>&1`
-
-13. To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
+12. To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
 
     `# cp -a frontend/ /var/www/html/ `
