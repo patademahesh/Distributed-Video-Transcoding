@@ -1,5 +1,5 @@
-# Simple Scalable, Parallel, Multi-bitrate Video Transcoding
-Simple Scalable, Parallel, Multi-bitrate Video Transcoding On Centos / Ubuntu / Suse / RedHat (Bash Scripts)
+# Distributed Multi-bitrate Video Transcoding
+Distributed Multi-bitrate Video Transcoding On Centos / Ubuntu / Suse / RedHat (Bash Scripts)
 
 Multi-bitrate Video processing requires lots of computing power and time to process full movie. There are different open source video transcoding and processing tools freely available in Linux, like libav-tools, ffmpeg, mencoder, and handbrake. However, none of these tools support **PARALLEL** computing easily.
 
