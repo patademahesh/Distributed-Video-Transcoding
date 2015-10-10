@@ -55,14 +55,20 @@
 
 <ul>
 <li>Script is responsible for syncing files to all nodes(Disabled ssh encryptions to speed up transfer)</li>
-<li>Updating duration, file path, filename of video and number of nodes available currently for transcoding to MYSQL</li>
+<li>Divide video duration by number of nodes available to process and add start time, length to MySQL queue table.</li>
+<li>Updating duration, file path, filename of video and number of nodes available for transcoding to MySQL</li>
 </ul>
 </li>
-<li>Transcode Nodes will split the work into even sized chunks for each node</li>
+<li>Transcode Nodes will pick jobs from the queue</li>
 <li>Each Node will then process their segments of video and raise a flag when done</li>
-<li>Master nodes will wait for each of the all-done flags, and then any master will pick the job to concatenate the result</li>
+<li>Master nodes will wait for each of the all-done flags, and then any master worker will pick the job to concatenate the result</li>
 <li>Upload converted files to different CDN</li>
 </ol>
+
+<h1>
+<a id="fault-tolerant" class="anchor" href="#fault-tolerant" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fault Tolerant</h1>
+
+<p>Making this process fault tolerant to node failures, I have written small script checkNodeFailed.sh, which will check for failed nodes and will try to reassign that job to another node. We need to add every minute cron run this.</p>
 
 <h1>
 <a id="pre-requisites" class="anchor" href="#pre-requisites" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pre-requisites:</h1>
@@ -106,6 +112,12 @@
 <li>Install mysql-server and import SQL file 'transcoding.sql'. Create 'transcode' user with password same as username. Make sure user is able to connect from all of the worker nodes.</li>
 <li><p>NFS Export /srv directory and mount it on all nodes with NFS client option "lookupcache=none"</p></li>
 <li><p>On all servers install supervisord and copy supervisord.conf from download directory to /etc/supervisord.conf. Restart supervisord service.</p></li>
+<li><p>Add every minute cron for checkNodeFailed.sh script. </p></li>
+</ol>
+
+<p>*/1 * * * * /srv/checkNodeFailed.sh</p>
+
+<ol>
 <li>
 <p>To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/</p>
 
