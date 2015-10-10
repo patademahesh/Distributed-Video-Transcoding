@@ -9,11 +9,15 @@ The Algorithm is same as Dustin's solution but with some changes:
 
   1. Upload file to FTP. After a successful upload CallUploadScript(pure-ftpd function) will call script:
       - Script is responsible for syncing files to all nodes(Disabled ssh encryptions to speed up transfer)
-      - Updating duration, file path, filename of video and number of nodes available currently for transcoding to MYSQL
-  2. Transcode Nodes will split the work into even sized chunks for each node
+      - Divide video duration by number of nodes available to process and add start time, length to MySQL queue table.
+      - Updating duration, file path, filename of video and number of nodes available for transcoding to MySQL
+  2. Transcode Nodes will pick jobs from the queue
   3. Each Node will then process their segments of video and raise a flag when done
-  4. Master nodes will wait for each of the all-done flags, and then any master will pick the job to concatenate the result
+  4. Master nodes will wait for each of the all-done flags, and then any master worker will pick the job to concatenate the result
   5. Upload converted files to different CDN
+
+# Fault Tolerant
+Making this process fault tolerant to node failures, I have written small script checkNodeFailed.sh, which will check for failed nodes and will try to reassign that job to another node. We need to add every minute cron run this.
 
 # Pre-requisites:
   1. bc
@@ -51,6 +55,9 @@ The Algorithm is same as Dustin's solution but with some changes:
 
 11. On all servers install supervisord and copy supervisord.conf from download directory to /etc/supervisord.conf. Restart supervisord service.
 
-12. To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
+12. Add every minute cron for checkNodeFailed.sh script. 
+*/1 * * * * /srv/checkNodeFailed.sh
+
+13. To check the status of jobs you may use the dashboard. Copy frontend folder to your apache DocumentRoot. In my case its /var/www/html/
 
     `# cp -a frontend/ /var/www/html/ `
